@@ -1,0 +1,731 @@
+/* ==============================
+   1. レイアウトの基礎構造
+   ============================== */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0; padding: 0;
+    background: #e0e0e0;
+    font-family: 'Roboto', sans-serif;
+    display: flex; justify-content: center; align-items: center;
+    height: 100vh; overflow: hidden;
+}
+
+/* スマホ本体（黒い外枠） */
+#smartphone-body {
+    width: 375px; height: min(750px, 95vh);
+    background: #111;
+    border-radius: 45px; /* 外側の丸み */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    padding: 12px; /* ベゼルの幅 */
+    position: relative;
+    z-index: 10;
+    margin-top: 0px;
+}
+
+/* 液晶画面エリア（白い部分） */
+#screen-glass {
+    width: 100%; height: 100%;
+    background: #fff;
+    border-radius: 32px; /* 内側の丸み（ベゼルに合わせる） */
+    overflow: hidden; /* ★ここが重要：中身のはみ出しをカット */
+    position: relative;
+    display: flex;
+    flex-direction: column; /* 縦並び配置 */
+}
+
+/* ==============================
+   2. 画面内パーツ（上・中・下）
+   ============================== */
+
+/* 上：ステータスバー (固定) */
+#status-bar {
+    height: 30px;
+    background: #fff;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 15px; font-size: 12px; font-weight: bold; color: #333;
+    flex-shrink: 0; /* 縮ませない */
+    z-index: 20; border-bottom: 1px solid #f0f0f0;
+}
+
+/* 中：アプリコンテナ (可変・スクロール) */
+#app-container {
+    flex: 1; /* 残りの高さを全部埋める */
+    position: relative;
+    overflow: hidden; /* コンテナ自体はスクロールしない */
+    width: 100%;
+}
+
+/* 各ビューの共通設定 */
+.view {
+    display: none;
+    width: 100%; height: 100%;
+    overflow-y: auto; /* コンテンツが多い時だけスクロール */
+    position: absolute; top: 0; left: 0;
+    background: #fff;
+}
+.view.active { display: flex !important; flex-direction: column; }
+/* ホーム画面はblock表示が良い場合もあるので調整 */
+#home-screen.active { display: block !important; }
+
+/* 下：ナビゲーションバー (固定) */
+#nav-bar {
+    height: 60px; /* 少し高くする */
+    background: #000;
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center;
+    flex-shrink: 0;
+    z-index: 20;
+    padding-bottom: 5px;
+}
+
+.nav-btn {
+    background: none; 
+    border: none; 
+    color: #888; 
+    cursor: pointer; 
+    padding: 5px 15px; /* タップ領域を広げる */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover, .nav-btn:active {
+    color: #fff;
+}
+
+.nav-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.nav-label {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* ==============================
+   3. アプリごとのデザイン
+   ============================== */
+
+/* --- Home Screen --- */
+#home-screen {
+    background: linear-gradient(160deg, #2c3e50 0%, #3498db 100%);
+    padding: 30px 20px;
+}
+.home-header { text-align: center; margin-bottom: 20px; }
+#current-location-display {
+    color: rgba(255,255,255,0.9); background: rgba(0,0,0,0.3);
+    padding: 5px 15px; border-radius: 20px; font-size: 14px; display: inline-block;
+}
+.app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+.app-icon { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+.app-icon span { color: white; font-size: 11px; margin-top: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+.icon-img {
+    width: 55px; height: 55px; border-radius: 14px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 22px; color: white; font-weight: bold;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+/* アイコン色 */
+.google-map-icon { background: #fff; color: #EA4335; }
+.moovit-icon { background: #F8991D; }
+.viabus-icon { background: #1A73E8; }
+.grab-icon { background: #00B14F; font-size: 14px; }
+.bolt-icon { background: #34D186; font-size: 14px; }
+
+/* すべての地図コンテナに強制的に高さを与える */
+.map-container {
+    width: 100%;
+    height: 100%;
+    min-height: 100%; /* 念のため */
+    background-color: #e5e3df; /* 地図がロードされるまでの背景色 */
+    z-index: 1;
+}
+
+/* ==============================
+   4. オーバーレイ（説明画面・許可画面など）修正版
+   ============================== */
+.overlay-page {
+    position: absolute; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    z-index: 1000; 
+    background: #ffffff;
+    
+    /* 最初は非表示 */
+    display: none; 
+
+    /* ★変更点1: スクロールを許可 */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* iOSでのスクロールを滑らかに */
+    
+    /* フレックスボックス設定 */
+    flex-direction: column;
+    align-items: center; /* 横方向は中央揃え */
+    
+    /* ★変更点2: justify-content: center を削除 */
+    /* これがあると長いコンテンツの上下が見切れてしまいます */
+}
+
+.overlay-page.active {
+    display: flex; 
+}
+
+.content-box {
+    width: 100%;
+    max-width: 320px;
+    
+    /* ★変更点3: 上下のマージンを auto にする */
+    /* これにより、画面より小さい時は垂直中央に、大きい時は上から配置されます */
+    margin: auto; 
+    
+    /* 上下に余白を持たせて、端っこギリギリにならないようにする */
+    padding: 40px 20px;
+}
+
+/* 以下は変更なし */
+.content-box h1, .content-box h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.content-box p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    text-align: center; /* デフォルトは中央揃え */
+}
+
+/* 左揃えエリア用 */
+.left-align {
+    text-align: left;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.left-align p {
+    text-align: left; /* 上書き */
+}
+
+/* ボタン */
+.flow-btn {
+    display: block; /* ブロック要素にして中央配置しやすく */
+    margin: 0 auto; /* ボタン自体を中央寄せ */
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.1s;
+    line-height: 1.2;
+}
+
+.flow-btn:active {
+    transform: scale(0.98);
+}
+
+/* Google Maps */
+.search-bar { display: flex; gap: 5px; padding-top: 10px; }
+.search-bar input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+.full-screen-map {
+    height: 100%;
+    width: 100%;
+}
+.bottom-sheet {
+    position: absolute; bottom: 0; left: 0; width: 100%;
+    background: white; padding: 20px; border-top-left-radius: 20px; border-top-right-radius: 20px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+
+.floating-search-bar {
+    position: absolute;
+    top: 50px; /* ステータスバーの下 */
+    left: 15px;
+    right: 15px;
+    background: white;
+    height: 48px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    z-index: 1000; /* 地図より上 */
+    transition: all 0.3s ease;
+}
+
+.floating-search-bar input {
+    border: none;
+    flex: 1;
+    margin-left: 10px;
+    font-size: 16px;
+    outline: none;
+}
+
+/* 検索候補リスト（全画面を覆う） */
+.search-suggestions {
+    position: absolute;
+    top: 100px; /* 検索バーの下 */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 100px);
+    background: white;
+    z-index: 999;
+    display: none; /* 最初は隠す */
+    padding-top: 10px;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+.suggestion-item:active { background: #f0f0f0; }
+
+.text-group { display: flex; flex-direction: column; margin-left: 15px; }
+.sugg-title { font-weight: bold; font-size: 16px; }
+.sugg-desc { font-size: 12px; color: #666; }
+
+/* 検索結果ボトムシート */
+.bottom-sheet {
+    position: absolute;
+    bottom: 0; 
+    left: 0; 
+    width: 100%;
+    background: white;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    padding: 20px;
+    padding-bottom: 80px; /* ナビバーとかぶらないように余白 */
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 900;
+    transform: translateY(100%); /* 最初は下に隠す */
+    transition: transform 0.3s ease-out;
+}
+.bottom-sheet.show {
+    transform: translateY(0);
+}
+.sheet-handle {
+    width: 40px; height: 4px; background: #ddd; margin: 0 auto 15px auto; border-radius: 2px;
+}
+.primary-btn {
+    width: 100%; background: #1a73e8; color: white; border: none; padding: 12px;
+    border-radius: 24px; font-weight: bold; margin-top: 15px;
+}
+/* --- Google Maps Route List Styling --- */
+
+/* 左側：ルート概要と詳細 */
+.route-left {
+    flex: 1; /* 余った幅を全部使う */
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* 上下の行間 */
+    padding-right: 10px;
+}
+.route-summary {
+    font-size: 16px;
+    font-weight: bold;
+    color: #202124;
+}
+.route-details {
+    font-size: 13px;
+    color: #5f6368;
+    line-height: 1.4;
+}
+
+/* 右側：時間とコスト */
+.route-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* 右寄せ */
+    gap: 4px;
+    min-width: 80px; /* 幅を確保して崩れないように */
+}
+.route-time {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1a73e8; /* Google Blue */
+}
+.route-cost {
+    font-size: 13px;
+    color: #5f6368;
+}
+
+/* リストが空の場合のメッセージ */
+.no-routes-msg {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+.gmap-tabs {
+    display: flex; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;
+}
+.tab-btn {
+    background: #f0f0f0; border: none; padding: 8px 15px; border-radius: 20px; font-size: 14px; cursor: pointer;
+}
+.tab-btn.active {
+    background: #1a73e8; color: white;
+}
+
+/* ViaBus */
+.viabus-theme {
+    position: relative; /* 重ね合わせの基準 */
+    height: 100%;
+}
+
+.viabus-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    right: 10px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    padding: 15px;
+    z-index: 10; /* 地図より手前に表示 */
+    max-height: 60%;
+    overflow-y: auto;
+}
+.viabus-header {
+    padding: 15px;
+    border-bottom: 1px solid #334;
+    background: #1E2D53;
+}
+.viabus-scroll-area {
+    height: calc(100% - 60px);
+    overflow-y: auto;
+}
+.viabus-line-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #334;
+}
+
+/* 1. 回転の基準となるコンテナ (JSで角度がつく部分) */
+.bus-marker-body {
+    width: 28px;
+    height: 28px;
+    position: relative;
+    /* ここにJSで transform: rotate(...) が入ります */
+}
+
+/* 2. 実際の雫型 (擬似要素で作る) */
+.bus-marker-body::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    
+    /* バスらしい黄色 */
+    background-color: #160775; 
+    
+    /* 視認性を高める枠線 */
+    border: 2px solid #333; 
+    
+    /* ★ここが雫型のキモ */
+    /* 左上だけ角張らせて、残りを丸くする */
+    border-radius: 0 50% 50% 50%; 
+    
+    /* そのままだと左上が尖るので、45度回して「上」を尖らせる */
+    transform: rotate(45deg); 
+    
+    /* 影をつけて浮遊感を出す */
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    
+    /* 位置調整 */
+    box-sizing: border-box;
+}
+
+/* 3. 中の番号テキスト */
+.bus-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    /* transform: translate(...) は JS側で制御するのでCSSからは削除 */
+    
+    color: white;
+    font-weight: bold;
+    font-size: 11px; /* 少し小さくして枠内に収まりやすく */
+    font-family: sans-serif;
+    white-space: nowrap; /* 折り返し防止 */
+    
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    z-index: 10;
+    pointer-events: none; /* 文字がクリックを邪魔しないように */
+}
+
+/* --- バス停のアイコン (念のため再掲) --- */
+.viabus-stop-marker {
+    background-color: #fff;
+    border: 3px solid #1E2D53; /* ViaBusカラーの紺色 */
+    color: #1E2D53;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px; /* アイコンの高さに合わせる */
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    font-weight: bold;
+}
+
+/* Grab */
+.grab-route-state {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* 全体スクロールを防ぐ */
+    background: #fff;
+}
+
+.top-nav {
+    flex-shrink: 0;
+    padding: 15px; background: #fff;
+    display: flex; align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+/* Grabの地図: ★ここが重要 */
+#map-grab {
+    flex: 1; /* 残りの高さを全部使う */
+    width: 100%;
+    min-height: 0;
+}
+
+/* Grabのパネル */
+.booking-panel {
+    flex-shrink: 0; /* 縮ませない */
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+/* パネルの中身 */
+.service-list { margin-bottom: 20px; }
+.service-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px; border-bottom: 1px solid #f0f0f0;
+}
+.service-item.selected { background-color: #f0fcf4; border-color: #00B14F; }
+.grab-btn {
+    width: 100%; padding: 15px; background: #00B14F; color: white;
+    border: none; border-radius: 5px; font-size: 18px; font-weight: bold;
+    cursor: pointer;
+}
+
+
+/* Grab Specific */
+.grab-theme .action-btn { background: #00B14F; }
+.grab-theme .dot.green { color: #00B14F; }
+.grab-home-state {
+    padding: 20px;
+    background: #f0fcf4; /* Grab Green Light */
+    height: 100%;
+}
+.search-box-fake {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    color: #555;
+    cursor: pointer;
+}
+.red-dot { color: #f03e3e; }
+.back-arrow { border: none; background: none; font-size: 20px; margin-right: 10px; }
+
+.grab-top-banner {
+    background: #00B14F; color: white; padding: 20px; font-size: 24px; font-weight: bold;
+}
+.grab-service-grid {
+    display: flex; flex-wrap: wrap; padding: 20px; gap: 20px; justify-content: space-around;
+}
+.grab-service-icon {
+    display: flex; flex-direction: column; align-items: center; width: 70px; cursor: pointer;
+}
+.grab-service-icon .circle {
+    width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; margin-bottom: 5px;
+}
+.circle.green { background: #e0f7ea; }
+.circle.orange { background: #fff3e0; }
+
+
+/* bolt */
+
+/* 1. アプリ枠: 強制的に画面いっぱいに広げる */
+#bolt.view.active {
+    display: block !important;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #fff;
+}
+
+/* 2. 各画面（レイヤー）の共通設定: 絶対配置で重ねる */
+.bolt-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- ホーム画面のデザイン --- */
+/* 背景のドット柄 */
+.bolt-map-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #e5e3df;
+    background-image: radial-gradient(#bbb 2px, transparent 2px);
+    background-size: 20px 20px;
+    z-index: 1;
+}
+
+/* 下部の白いパネル */
+.bolt-bottom-panel {
+    position: absolute;
+    bottom: 0; left: 0; width: 100%;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 40px 20px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.bolt-header-text {
+    font-size: 24px; font-weight: bold; color: #333; margin-bottom: 15px;
+}
+
+.search-trigger {
+    background: #f2f2f2; padding: 15px; border-radius: 10px;
+    display: flex; align-items: center; cursor: pointer;
+}
+
+.green-dot { color: #34D186; margin-right: 10px; font-size: 14px; }
+.placeholder { color: #555; font-size: 16px; font-weight: 500; }
+
+.recent-dest {
+    margin-top: 15px; padding-top: 15px; border-top: 1px solid #f9f9f9;
+    color: #555; display: flex; align-items: center;
+}
+.recent-dest .icon { margin-right: 10px; }
+
+
+/* --- 検索画面のデザイン --- */
+.bolt-search-bar {
+    padding: 15px; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; background: #fff;
+}
+#bolt-search-back {
+    border: none; background: none; font-size: 24px; margin-right: 10px; cursor: pointer;
+}
+.bolt-real-input-box {
+    flex: 1; background: #f2f2f2; padding: 10px; border-radius: 8px; display: flex; align-items: center;
+}
+#bolt-real-input {
+    border: none; background: transparent; width: 100%; font-size: 16px; outline: none;
+}
+
+
+/* --- Bolt 配車画面 (Booking) --- */
+/* 親コンテナの設定: 縦並びにして、はみ出しを隠す */
+#bolt-booking {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: #fff;
+    position: absolute; /* レイヤーとして重ねる */
+    top: 0; left: 0; width: 100%;
+    z-index: 90;
+}
+
+/* 上部のナビバー */
+.bolt-nav-top {
+    flex-shrink: 0; /* 縮ませない */
+    padding: 15px;
+    background: #fff;
+    display: flex; align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    z-index: 20;
+}
+
+/* 地図エリア: ★ここが重要 */
+#map-bolt {
+    flex: 1; /* 残りの高さを全部使う */
+    width: 100%;
+    min-height: 0; /* Flexboxで地図を正しく縮小させるおまじない */
+    z-index: 1;
+}
+
+/* 車種選択パネル */
+.bolt-vehicle-panel {
+    flex-shrink: 0; /* 縮ませない */
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    z-index: 10;
+    max-height: 50%; /* 念のため画面の半分以上はいかないように */
+    overflow-y: auto; /* パネル内だけスクロール許可 */
+}
+
+/* パネルの中身 */
+.bolt-vehicle-panel h3 { margin: 0 0 15px 0; font-size: 18px; color: #333; }
+.vehicle-option {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px;
+}
+.bolt-confirm-btn {
+    width: 100%; padding: 15px; background: #34D186; color: white;
+    border: none; border-radius: 30px; font-size: 18px; font-weight: bold;
+    cursor: pointer; margin-top: 10px;
+}
+
+/* --- Moovit --- */
+.moovit-theme { background: #fff; flex-direction: column; }
+.orange-header { background: #F04E23; color: white; padding: 15px; }
+.moovit-input-box { background: white; padding: 10px; border-radius: 5px; display: flex; align-items: center; margin-top: 10px; }
+.moovit-input-box input { border: none; width: 100%; margin-left: 10px; outline: none; }
+.route-list { padding: 10px; background: #eee; flex: 1; overflow-y: auto; }
+
+#experiment-overlays {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none;
+}
+.overlay-page {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: none; justify-content: center; align-items: center; pointer-events: auto;
+}
+.overlay-page.active { display: flex !important; }
+
+.content-box {
+    background: white; width: 85%; padding: 30px; border-radius: 15px; text-align: center;
+}
+.flow-btn {
+    background: #1a73e8; color: white; border: none; padding: 10px 25px; border-radius: 20px; font-size: 16px; margin-top: 20px; cursor: pointer;
+}
+.tutorial-icons span { display: block; margin: 5px 0; color: #555; }

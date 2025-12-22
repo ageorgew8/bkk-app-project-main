@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobility App Experiment</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./style.css">
+    </head>
+<body>
+    <div id="experiment-overlays">
+        <div id="page-landing" class="overlay-page active">
+            <div class="content-box">
+                <h1>Bangkok Mobility App Experiment<br><small style="font-size:0.6em; font-weight:normal;">การทดลองใช้งานแอปพลิเคชันเพื่อการเดินทางในกรุงเทพฯ</small></h1>
+                
+                <p>
+                    Welcome to the mobility app experiment.<br>
+                    This research aims to figure out how people utilize multiple mobility apps in Bangkok and how do people feel about it.<br>
+                    Please use smartphone for the experiment.<br>
+                    <span style="color:#666; font-size:0.9em;">
+                    ยินดีต้อนรับสู่การทดลองใช้งานแอปพลิเคชันที่ใช้สำหรับการเดินทาง (Mobility App)<br>
+                    การวิจัยนี้มีวัตถุประสงค์เพื่อศึกษาว่าประชาชนในกรุงเทพฯ ใช้งานแอปฯ 
+                    ด้านการเดินทางหลายแอปฯ ร่วมกันอย่างไร 
+                    และมีความรู้สึกหรือความคิดเห็นอย่างไรต่อการใช้งานเหล่านั้น<br>
+                    กรุณาใช้ <strong>สมาร์ตโฟน</strong> ในการเข้าร่วมการทดลองครั้งนี้
+                    </span>
+                </p>
+                
+                <button class="flow-btn" onclick="Flow.nextStep()">Start Experiment<br><small>เริ่มการทดลอง</small></button>
+            </div>
+        </div>
+
+        <div id="page-consent" class="overlay-page">
+            <div class="content-box">
+                <h2>Consent Form<br><small style="font-size:0.6em;">แบบฟอร์มยินยอมเข้าร่วมการทดลอง</small></h2>
+                <div class="left-align" style="font-size:0.95em;">
+                    <p>
+                        <strong>1. Purpose:</strong> The data obtained will be used for research purposes only.<br>
+                        <span style="color:#666;"><strong>วัตถุประสงค์:</strong> ข้อมูลที่ได้จากการทดลองนี้จะนำไปใช้เพื่อการวิจัยเท่านั้น ไม่มีการนำไปใช้ในวัตถุประสงค์อื่น</span>
+                    </p>
+                    <p>
+                        <strong>2. Privacy:</strong> No personally identifiable information will be collected.<br>
+                        <span style="color:#666;"><strong>ความเป็นส่วนตัว:</strong> การทดลองนี้จะไม่มีการเก็บข้อมูลส่วนบุคคล หรือข้อมูลใด ๆ ที่สามารถระบุตัวตนของผู้เข้าร่วมได้</span>
+                    </p>
+                    <p>
+                        <strong>3. Withdrawal:</strong> If you feel unwell, you may stop immediately.<br>
+                        <span style="color:#666;"><strong>การยุติการทดลอง:</strong> หากคุณรู้สึกไม่สบายใจหรือไม่พร้อม สามารถหยุดการทดลองได้ทันที โดยไม่เกิดผลกระทบใด ๆ</span>
+                    </p>
+                </div>
+                <label style="display:block; margin-top:20px; background:#f9f9f9; padding:10px; border-radius:8px;">
+                    <input type="checkbox" id="consent-check"> 
+                    I agree to participate.<br>
+                    <span style="color:#666; font-size:0.9em;">ข้าพเจ้ายินยอมเข้าร่วมการทดลอง</span>
+                </label>
+                <br>
+                <button class="flow-btn" onclick="Flow.checkConsent()">Next<br><small>ถัดไป</small></button>
+            </div>
+        </div>
+
+        <div id="page-briefing" class="overlay-page">
+            <div class="content-box">
+                <h2>Experiment Overview<br><small style="font-size:0.6em;">ภาพรวมการทดลอง</small></h2>
+                <div class="left-align">
+                    <p>
+                        You are currently at the Central Square (in front of the Auditorium) of Chulalongkorn University. Three destinations will be displayed.<br>
+                        Please search for routes to each destination using the apps and select the route that meets the given constraints.<br>
+                        As this is an experiment to observe app usage behavior, <strong>please do not answer based on your intuition or your usual routes.</strong><br>
+                        Instead, ensure you use the multiple apps provided and choose from the routes presented in the apps.<br>
+                        <span style="color:#666;">
+                            ขณะนี้คุณอยู่ที่ลานกิจกรรมกลาง (หน้าหอประชุมใหญ่) ของจุฬาลงกรณ์มหาวิทยาลัย โดยจะมีจุดหมายปลายทางแสดงขึ้นมา 3 แห่ง กรุณาใช้แอปพลิเคชันเพื่อค้นหาเส้นทางไปยังแต่ละจุดหมาย และเลือกเส้นทางที่ตรงตามเงื่อนไขที่กำหนดให้<br>
+                            เนื่องจากการทดลองนี้มีวัตถุประสงค์เพื่อสังเกตพฤติกรรมการใช้งานแอปพลิเคชัน <strong>กรุณาอย่าตอบโดยใช้ความรู้สึกส่วนตัวหรือเส้นทางที่คุณเคยใช้เป็นประจำ</strong> แต่ขอให้ใช้แอปพลิเคชันต่างๆ ที่เตรียมไว้ให้ และเลือกตอบจากเส้นทางที่ปรากฏในแอปพลิเคชันเหล่านั้นเท่านั้น<br>
+                        </span>
+                    </p>
+                </div>
+                <button class="flow-btn" onclick="Flow.nextStep()">Next</button>
+            </div>
+        </div>
+
+        <div id="page-tutorial1" class="overlay-page">
+            <div class="content-box">
+                <h2>How to Play</h2>
+                
+                <div style="margin: 15px 0; border: 2px solid #ddd; border-radius: 10px; overflow: hidden;">
+                    <img src="img/demo1.png" alt="Demo" style="width: 100%; display: block;">
+                </div>
+
+                <p style="font-size: 0.9em;">
+                    Check the destination and constraints of the task.
+                    <span style="color:#666;">ตรวจสอบจุดหมายปลายทางและเงื่อนไขต่างๆ ของภารกิจที่ได้รับ</span>
+                </p>
+
+                <button class="flow-btn" onclick="Flow.nextStep()">Next</button>
+            </div>
+        </div>
+
+        <div id="page-tutorial2" class="overlay-page">
+            <div class="content-box">
+                <h2>How to Play</h2>
+                
+                <div style="margin: 15px 0; border: 2px solid #ddd; border-radius: 10px; overflow: hidden;">
+                    <img src="img/demo2.gif" alt="Demo" style="width: 100%; display: block;">
+                </div>
+
+                <p style="font-size: 0.9em;">
+                    Check apps to find the route options.<br>
+                    You can change apps with "〇 apps" button at the bottom.
+                    You can check the task with "☐ task" button at the bottom.<br> 
+                    <span style="color:#666;">
+                        ตรวจสอบแอปพลิเคชันต่างๆ เพื่อค้นหาตัวเลือกเส้นทาง<br>
+                        คุณสามารถเปลี่ยนแอปพลิเคชันได้โดยกดปุ่ม "〇 apps" ที่อยู่ด้านล่าง
+                        คุณสามารถตรวจสอบรายละเอียดภารกิจได้โดยกดปุ่ม "☐ task" ที่อยู่ด้านล่าง<br>
+                    </span>               
+                </p>
+
+                <button class="flow-btn" onclick="Flow.nextStep()">Next</button>
+            </div>
+        </div>
+        
+        <div id="page-tutorial3" class="overlay-page">
+            <div class="content-box">
+                <h2>How to Play</h2>
+                
+                <div style="margin: 15px 0; border: 2px solid #ddd; border-radius: 10px; overflow: hidden;">
+                    <img src="img/demo3.gif" alt="Demo" style="width: 100%; display: block;">
+                </div>
+
+                <p style="font-size: 0.9em;">
+                    When you decide the route, go "☐ task" and choose your route 
+                    <span style="color:#666;">ตรวจสอบจุดหมายปลายทางและเงื่อนไขต่างๆ ของภารกิจที่ได้รับ</span>
+                </p>
+
+                <button class="flow-btn" onclick="Flow.startTaskPhase()">Start Task 1</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="smartphone-body">
+        
+        <div id="screen-glass">
+            
+            <div id="status-bar">
+                <span id="status-clock">12:00</span>
+                <span>🔋 100%</span>
+            </div>
+
+            <div id="app-container">
+                
+                <div id="home-screen" class="view active">
+                    <div class="home-header">
+                        <p id="current-location-display">📍 Bangkok, TH</p>
+                    </div>
+                    <div class="app-grid">
+                        <div class="app-icon" data-app-id="google-map">
+                            <div class="icon-img google-map-icon">G</div>
+                            <span>Maps</span>
+                        </div>
+                        <div class="app-icon" data-app-id="moovit">
+                            <div class="icon-img moovit-icon"><i class="fas fa-bus"></i></div>
+                            <span>Moovit</span>
+                        </div>
+                        <div class="app-icon" data-app-id="viabus">
+                            <div class="icon-img viabus-icon">V</div>
+                            <span>ViaBus</span>
+                        </div>
+                        <div class="app-icon" data-app-id="grab">
+                            <div class="icon-img grab-icon">Grab</div>
+                            <span>Grab</span>
+                        </div>
+                        <div class="app-icon" data-app-id="bolt">
+                            <div class="icon-img bolt-icon">Bolt</div>
+                            <span>Bolt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="task-answer-screen" class="view app-screen" style="background: white; padding: 20px;">
+                    <h2 style="margin-top:0;">Current Task</h2>
+                    <div class="task-card" style="background:#f9f9f9; padding:15px; border-radius:10px; border:1px solid #ddd; margin-bottom:20px;">
+                        <h3 id="task-title-display" style="margin:0 0 10px 0; color:#333;">Task Title</h3>
+                        <p id="task-desc-display" style="font-size:14px; color:#555;">Task Description...</p>
+                </div>
+
+                <h3>Your Decision<small style="font-size:0.6em;">การตัดสินใจของคุณ</small></h3>
+                    <p>Which route will you take?<br>
+                    <span style="color:#666; font-size:0.9em;">คุณจะเลือกเส้นทางไหน?</span>
+                    </p>
+
+                    <form id="answer-form">
+                        <label style="display:block; margin-bottom:5px; font-weight:bold;">Select Route:</label>
+                        
+                        <select id="answer-selection" style="width:100%; padding:12px; margin-bottom:20px; border-radius:8px; border:1px solid #ccc; font-size:16px;">
+                            <option value="" disabled selected>Select an option...</option>
+                            </select>
+
+                        <button type="button" class="action-btn" style="background:#333;" onclick="Flow.submitAnswer()">Submit & Next Task</button>
+                    </form>
+                </div>
+
+            
+                <div id="google-map" class="view app-screen map-app-theme">
+                    <div class="floating-search-bar" id="gmap-search-bar">
+                        <span class="g-icon">G</span>
+                        <input type="text" placeholder="Search here" id="gmap-input"> 
+                        <span class="mic-icon">🎤</span>
+                    </div>
+
+                    <div class="search-suggestions" id="gmap-suggestions" style="display:none;">
+                        </div>
+
+                    <div id="map-google" class="map-container full-screen-map"></div>
+
+                    <div class="bottom-sheet" id="gmap-bottom-sheet">
+                        <div class="sheet-handle"></div>
+                        <h3 class="task-destination">Destination Name</h3>
+                        
+                        <div class="gmap-tabs">
+                            <button class="tab-btn active" data-mode="transit">🚆 Transit</button>
+                            <button class="tab-btn" data-mode="car">🚗 Car</button>
+                            <button class="tab-btn" data-mode="walk">🚶 Walk</button>
+                        </div>
+
+                        <div id="gmap-route-list"></div>
+                    </div>
+                </div>
+
+                <div id="moovit" class="view app-screen moovit-theme">
+                    <div id="moovit-search-state">
+                        <div class="app-header orange-header">
+                            <h3>Moovit</h3>
+                        </div>
+                        <div style="padding: 20px;">
+                            <h2 style="color: #333;">Where do you want to go?</h2>
+                            <div class="moovit-input-box">
+                                <span style="color:#F04E23">●</span>
+                                <input type="text" id="moovit-input" placeholder="Search destination">
+                            </div>
+                            <div id="moovit-suggestions" class="suggestion-list"></div>
+                        </div>
+                    </div>
+
+                    <div id="moovit-result-state" style="display:none; height:100%;">
+                        <div class="app-header orange-header" style="display:flex; align-items:center;">
+                            <button id="moovit-back-btn" style="background:none; border:none; color:white; font-size:20px; margin-right:10px;">←</button>
+                            <div>
+                                <p style="font-size:12px; margin:0;">Directions to:</p>
+                                <h3 class="destination-text task-destination" style="margin:0;">Dest</h3>
+                            </div>
+                        </div>
+                        <div class="route-list" id="moovit-results"></div> 
+                    </div>
+                </div>
+
+                <div id="viabus" class="view app-screen viabus-theme">
+                    <div id="map-viabus" class="map-container"></div>
+                    
+                    <div class="viabus-overlay" id="viabus-panel">
+                        <div id="viabus-hint" style="text-align:center; padding:20px; color:#ccc;">
+                            <p>Tap a bus stop icon 🚏<br>to see incoming buses.</p>
+                        </div>
+
+                        <div id="viabus-list-container" style="display:none;">
+                            <div class="viabus-header">
+                                <h3 id="viabus-stop-name" style="margin:0; color:#F8E71C;">Stop Name</h3>
+                            </div>
+                            <div id="viabus-lines" class="viabus-scroll-area">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="grab" class="view app-screen grab-theme">
+                    <div id="grab-super-home">
+                        <div class="grab-top-banner">Good Afternoon!</div>
+                        <div class="grab-service-grid">
+                            <div class="grab-service-icon" id="grab-transport-btn">
+                                <div class="circle green">🚗</div>
+                                <span>Transport</span>
+                            </div>
+                            <div class="grab-service-icon">
+                                <div class="circle orange">🍔</div>
+                                <span>Food</span>
+                            </div>
+                            <div class="grab-service-icon">
+                                <div class="circle blue">🛒</div>
+                                <span>Mart</span>
+                            </div>
+                            <div class="grab-service-icon">
+                                <div class="circle purple">📦</div>
+                                <span>Express</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="grab-input-screen" style="display:none;">
+                        <div class="grab-header">
+                            <button id="grab-home-back">←</button>
+                            <span style="font-weight:bold; margin-left:10px;">Transport</span>
+                        </div>
+                        <div style="padding:15px;">
+                            <div class="search-box-fake">
+                                <span class="blue-dot">●</span> Current Location
+                            </div>
+                            <div class="search-box-real" style="margin-top:10px; border:1px solid #00B14F;">
+                                <span class="red-dot">●</span>
+                                <input type="text" id="grab-input" placeholder="Where to?">
+                            </div>
+                            <div id="grab-suggestions" class="suggestion-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="grab-route-state" id="grab-booking" style="display:none;">
+                    <div class="top-nav">
+                        <button class="back-arrow" id="grab-back-arrow">←</button>
+                        <span class="task-destination">Transport</span>
+                    </div>
+
+                    <div id="map-grab" class="map-container half-height"></div>
+
+                    <div class="booking-panel">
+                        <div class="service-list">
+                            <div class="service-item selected">
+                                <span class="service-name">JustGrab</span>
+                                <span class="service-price grab-price">--- THB</span>
+                            </div>
+                            <div class="service-item">
+                                <span class="service-name">GrabBike</span>
+                                <span class="service-price grab-bike-price">--- THB</span>
+                            </div>
+                        </div>
+                        <button class="action-btn grab-btn">Book JustGrab</button>
+                    </div>
+                    </div>
+                </div>
+
+                <div id="bolt" class="view app-screen bolt-theme">
+                    
+                    <div id="bolt-home" class="bolt-layer active">
+                        <div class="bolt-map-bg"></div> <div class="bolt-bottom-panel">
+                            <div class="bolt-header-text">Bolt</div>
+                            <div class="search-trigger" id="bolt-search-trigger">
+                                <span class="green-dot">●</span>
+                                <span class="placeholder">Where to?</span>
+                            </div>
+                            <div class="recent-dest">
+                                <span class="icon">🕒</span> Destination
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bolt-search" class="bolt-layer" style="display:none; background:#fff; z-index:100;">
+                        <div class="bolt-search-bar">
+                            <button id="bolt-search-back">←</button>
+                            <div class="bolt-real-input-box">
+                                <span class="green-dot">●</span>
+                                <input type="text" id="bolt-real-input" placeholder="Where to?">
+                            </div>
+                        </div>
+                        <div id="bolt-suggestions" class="suggestion-list"></div>
+                    </div>
+
+                    <div id="bolt-booking" class="bolt-layer" style="display:none; background:#fff; z-index:90;">
+                        <div class="bolt-nav-top">
+                            <button id="bolt-booking-back">←</button>
+                            <span>Bolt</span>
+                        </div>
+                        <div id="map-bolt" class="map-container" style="height: 50%;"></div>
+                        
+                        <div class="bolt-vehicle-panel">
+                            <h3>Choose a trip</h3>
+                            <div class="vehicle-option">
+                                <span class="v-name">Bolt</span>
+                                <span class="v-price bolt-std-price">--- THB</span>
+                                <span class="v-time">4 min</span>
+                            </div>
+                            <div class="vehicle-option">
+                                <span class="v-name">Economy</span>
+                                <span class="v-price bolt-eco-price">--- THB</span>
+                                <span class="v-time">8 min</span>
+                            </div>
+                            <button class="bolt-confirm-btn" onclick="Flow.submitAnswer()">Select Bolt</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="nav-bar">
+                <button id="home-btn">
+                    <div class="nav-icon">〇</div>
+                    <div class="nav-label">Apps</div>
+                </button>
+                <button id="task-btn">
+                    <div class="nav-icon">☐</div>
+                    <div class="nav-label">Task</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="js/flow.js"></script> 
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
