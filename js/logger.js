@@ -1,7 +1,7 @@
 // js/logger.js
 
 // ★ここにさっきコピーしたGASのURLを貼る
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxpRNU-WvlIFFJX9G1BylyhvTfguPSse_0CjT1t9hULg31AfqvKPVPW62DjhC8jgYQ3iQ/exec'; 
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwgE8aht-eEawdY9zosKI_hOhlmt3KxPc5LCid6vlybFueOh0OYC2PdPErRCo4pjkVt/exec'; 
 
 // 参加者IDの生成 (UUID v4)
 function generateUUID() {

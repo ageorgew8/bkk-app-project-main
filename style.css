@@ -3,24 +3,46 @@
    ============================== */
 * { box-sizing: border-box; }
 
+/* ==============================
+   1. レイアウトの基礎構造 (スマホのはみ出し対策版)
+   ============================== */
+* { box-sizing: border-box; }
+
 body {
     margin: 0; padding: 0;
     background: #e0e0e0;
     font-family: 'Roboto', sans-serif;
-    display: flex; justify-content: center; align-items: center;
-    height: 100vh; overflow: hidden;
+    
+    /* ★重要修正: スマホのアドレスバー分を考慮した高さ指定 */
+    height: 100vh;       /* フォールバック */
+    height: 100dvh;      /* Dynamic Viewport Height (バーを除いた実質領域) */
+    
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    overflow: hidden;    /* ページ全体のスクロール禁止 */
+    
+    /* iPhone X以降のノッチ・ホームバー対策 */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* スマホ本体（黒い外枠） */
+/* スマホ本体 */
 #smartphone-body {
-    width: 375px; height: min(750px, 95vh);
+    width: 375px; 
+    /* 画面の高さに合わせて自動調整 (上下に少し余白) */
+    height: 95%; 
+    max-height: 850px;
+    
     background: #111;
-    border-radius: 45px; /* 外側の丸み */
+    border-radius: 40px; 
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    padding: 12px; /* ベゼルの幅 */
+    padding: 12px;
     position: relative;
     z-index: 10;
-    margin-top: 0px;
+    margin: auto;
+    display: flex;       /* 中身を広げる */
+    flex-direction: column;
 }
 
 /* 液晶画面エリア（白い部分） */
@@ -147,95 +169,102 @@ body {
 }
 
 /* ==============================
-   4. オーバーレイ（説明画面・許可画面など）修正版
+   4. オーバーレイ（インストラクション画面）デザイン刷新
    ============================== */
 .overlay-page {
     position: absolute; 
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
+    top: 0; left: 0; width: 100%; height: 100%;
     z-index: 1000; 
-    background: #ffffff;
     
-    /* 最初は非表示 */
+    /* 背景を少し透過させて「乗っている感」を出すか、白で塗りつぶす */
+    background: #f5f7fa; 
+    
     display: none; 
-
-    /* ★変更点1: スクロールを許可 */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* iOSでのスクロールを滑らかに */
+    overflow-y: auto; /* 長いときはスクロール */
+    -webkit-overflow-scrolling: touch;
     
-    /* フレックスボックス設定 */
     flex-direction: column;
-    align-items: center; /* 横方向は中央揃え */
-    
-    /* ★変更点2: justify-content: center を削除 */
-    /* これがあると長いコンテンツの上下が見切れてしまいます */
+    align-items: center;
+    padding: 20px; /* 全体の余白 */
 }
 
-.overlay-page.active {
-    display: flex; 
-}
+.overlay-page.active { display: flex; }
 
+/* コンテンツのカードデザイン */
 .content-box {
     width: 100%;
-    max-width: 320px;
+    max-width: 340px;
+    margin: auto 0; /* 上下中央寄せ（スクロール時は上から） */
     
-    /* ★変更点3: 上下のマージンを auto にする */
-    /* これにより、画面より小さい時は垂直中央に、大きい時は上から配置されます */
-    margin: auto; 
-    
-    /* 上下に余白を持たせて、端っこギリギリにならないようにする */
-    padding: 40px 20px;
-}
-
-/* 以下は変更なし */
-.content-box h1, .content-box h2 {
-    color: #333;
-    margin-bottom: 20px;
+    background: white;
+    padding: 30px 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     text-align: center;
 }
 
-.content-box p {
-    color: #555;
-    line-height: 1.6;
+/* アイコン装飾 */
+.page-icon {
+    font-size: 48px;
     margin-bottom: 15px;
-    text-align: center; /* デフォルトは中央揃え */
+    display: block;
 }
 
-/* 左揃えエリア用 */
-.left-align {
-    text-align: left;
-    background: #f9f9f9;
+/* タイトル */
+.content-box h1 {
+    font-size: 24px; color: #2c3e50; margin-bottom: 10px; line-height: 1.3;
+}
+.content-box h2 {
+    font-size: 20px; color: #2c3e50; margin-bottom: 15px;
+}
+
+/* 本文テキスト */
+.content-box p {
+    color: #444; line-height: 1.6; margin-bottom: 20px; font-size: 15px;
+}
+
+/* 英語を目立たせ、タイ語を補足にするスタイル */
+.text-en {
+    display: block;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+}
+.text-th {
+    display: block;
+    font-size: 0.85em;
+    color: #888;
+    font-weight: normal;
+    line-height: 1.4;
+}
+
+/* 同意フォーム等の左揃えエリア */
+.info-card {
+    background: #f8f9fa;
+    border-left: 4px solid #1a73e8;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 4px;
+    text-align: left;
     margin-bottom: 20px;
 }
-.left-align p {
-    text-align: left; /* 上書き */
-}
+.info-item { margin-bottom: 12px; }
+.info-item:last-child { margin-bottom: 0; }
 
 /* ボタン */
 .flow-btn {
-    display: block; /* ブロック要素にして中央配置しやすく */
-    margin: 0 auto; /* ボタン自体を中央寄せ */
-    background: #1a73e8;
+    display: block; width: 100%;
+    background: linear-gradient(135deg, #1a73e8, #1557b0);
     color: white;
     border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
+    padding: 15px 0;
+    border-radius: 12px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.1s;
-    line-height: 1.2;
+    box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3);
+    transition: transform 0.1s, opacity 0.2s;
 }
-
-.flow-btn:active {
-    transform: scale(0.98);
-}
+.flow-btn:active { transform: scale(0.98); opacity: 0.9; }
 
 /* Google Maps */
 .search-bar { display: flex; gap: 5px; padding-top: 10px; }

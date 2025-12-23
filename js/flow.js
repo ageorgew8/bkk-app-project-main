@@ -23,9 +23,12 @@ function shuffleArray(array) {
 }
 
 // 例: .../viewform?entry.123456=
-const googleFormBaseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc3mRrkDWH9X6wmCZBTRi-Jn_ltC-CD07omWht40d7CV_29Ig/viewform?usp=pp_url&entry.1025575642=1";
+const googleFormBaseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc4eUF1meTszcW2Tw-1255r8H97NHXdW5hcAZRN7VWk2VpUzg/viewform?usp=pp_url&entry.1025575642=idhere";
 
 window.Flow = {
+    getCurrentTask: () => {
+        return taskQueue[currentTaskIndex];
+    },
 
     nextStep: () => {
         // 現在のページを隠す
@@ -80,43 +83,48 @@ window.Flow = {
             return; // ここで強制終了
         }
 
-        const selection = document.getElementById('answer-selection').value;
+        const select = document.getElementById('answer-selection');
+        const selection = select ? select.value : null;
+
         if (!selection) {
             alert("Please select a route.");
             return;
         }
 
+        // 現在のタスクID取得
         const currentTaskData = taskQueue[currentTaskIndex];
 
         sendLog('task_answer', {
-            task_order_index: currentTaskIndex + 1, 
+            task_order_index: currentTaskIndex + 1,
             task_id: currentTaskData.id,
             choice: selection
         });
 
         currentTaskIndex++;
-        appOpenCount = 0;
+        // appOpenCount = 0; // カウンターリセット
 
         if (currentTaskIndex < totalTasks) {
             alert("Answer saved. Proceeding to next task.");
+            
             updateTaskDisplay();
-            sendLog('Task_updated',{
-                task_order: currentTaskIndex + 1,
-                taskId: nextTaskData.id
-            })
+            
+            // ★修正: エラー回避のため、変数を経由せず直接参照する形に変更
+            const nextTask = taskQueue[currentTaskIndex];
+            
+            sendLog('Task_updated', { 
+                next_task_order: currentTaskIndex + 1,
+                next_task_id: nextTask ? nextTask.id : 'unknown'
+            });
+            
             dispatchTaskChangeEvent(currentTaskIndex);
             dispatchGoHomeEvent();
             setTimeout(() => { dispatchOpenTaskScreenEvent(); }, 500);
         } else {
-            // ★全タスク終了ログ
             sendLog('experiment_finish');
 
             if(confirm("All tasks completed. Proceed to questionnaire?")) {
-                // ID付きでフォームに飛ばす
-                // フォームの事前入力URLの末尾にIDを足す
-                // (フォーム側でID入力欄の entry.ID を調べておく必要があります)
-                // とりあえず今はIDをalertで出すか、URLパラメータとして渡す
-                const finalUrl = `${googleFormBaseUrl}?entry.xxxxxxx=${getParticipantId()}`;
+                // ... (フォーム遷移処理) ...
+                const finalUrl = `${googleFormBaseUrl}${getParticipantId()}`;
                 window.location.href = finalUrl;
             }
         }
