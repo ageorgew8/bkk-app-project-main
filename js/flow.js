@@ -101,7 +101,7 @@ window.Flow = {
         });
 
         currentTaskIndex++;
-        // appOpenCount = 0; // カウンターリセット
+        appOpenCount = 0; // カウンターリセット
 
         if (currentTaskIndex < totalTasks) {
             alert("Answer saved. Proceeding to next task.");
