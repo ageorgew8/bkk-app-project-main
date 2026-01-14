@@ -4,7 +4,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbxshRmrAMhCdLmyOteRvnV2
 
 // --- バッファリング設定 (アグレッシブ設定) ---
 const BUFFER_THRESHOLD = 50;   // 50件溜まるまで送らない
-const FLUSH_INTERVAL = 30000;  // または20秒経過するまで送らない
+const FLUSH_INTERVAL = 60000;  // または20秒経過するまで送らない
 let logBuffer = [];          
 let flushTimer = null;       
 
